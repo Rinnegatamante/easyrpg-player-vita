@@ -1,0 +1,12 @@
+prefix=/home/jenkins/workspace/liblcf-3ds
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: liblcf
+Description: Library to handle RPG Maker 2000 and 2003 game data
+Version: 0.4.1
+URL: https://easy-rpg.org/
+Requires.private:  icu-i18n
+Libs: -L${libdir} -llcf
+Cflags: -I${includedir}/liblcf

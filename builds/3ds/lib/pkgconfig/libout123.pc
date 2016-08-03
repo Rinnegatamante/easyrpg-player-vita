@@ -1,0 +1,11 @@
+prefix=/home/jenkins/workspace/toolchain-3ds/3ds
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libout123
+Description: A streaming audio output API derived from mpg123
+Requires: 
+Version: 1.23.3
+Libs: -L${libdir} -lout123 
+Cflags: -I${includedir} 

@@ -1,0 +1,11 @@
+prefix=/home/jenkins/workspace/toolchain-3ds/3ds
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libmpg123
+Description: An optimised MPEG Audio decoder
+Requires: 
+Version: 1.23.3
+Libs: -L${libdir} -lmpg123 
+Cflags: -I${includedir} 

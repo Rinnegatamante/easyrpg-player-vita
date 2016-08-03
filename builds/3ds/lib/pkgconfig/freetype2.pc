@@ -1,0 +1,14 @@
+prefix=/home/jenkins/workspace/toolchain-3ds/3ds
+exec_prefix=/home/jenkins/workspace/toolchain-3ds/3ds
+libdir=/home/jenkins/workspace/toolchain-3ds/3ds/lib
+includedir=/home/jenkins/workspace/toolchain-3ds/3ds/include
+
+Name: FreeType 2
+URL: http://freetype.org
+Description: A free, high-quality, and portable font engine.
+Version: 18.3.12
+Requires:
+Requires.private: zlib, libpng
+Libs: -L${libdir} -lfreetype
+Libs.private: 
+Cflags: -I${includedir}/freetype2
