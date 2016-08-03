@@ -21,7 +21,7 @@
 #include <string>
 #include "audio_decoder.h"
 
-#define BGM_BUFSIZE 406 // Max dimension of BGM buffer size
+#define BGM_BUFSIZE 4096 // Max dimension of BGM buffer size
 #define OGG_BUFSIZE 2048 // Max dimension of PCM16 decoded block by libogg
 
 struct DecodedSound{
@@ -50,7 +50,7 @@ struct DecodedMusic{
 	uint32_t eof_idx;
 	bool isPlaying;
 	int fade_val;
-	float vol;
+	int vol;
 	void (*updateCallback)();
 	void (*closeCallback)();
 };

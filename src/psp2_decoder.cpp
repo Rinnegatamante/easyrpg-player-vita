@@ -119,7 +119,6 @@ void UpdateAudioDecoderStream(){
 	if (audio_decoder->GetLoopCount() > 0){ // EoF
 		if (Sound->eof_idx == 0xFFFFFFFF) Sound->eof_idx = Sound->block_idx + 1;
 	}
-	
 }
 
 void CloseAudioDecoder(){
@@ -131,7 +130,7 @@ int OpenAudioDecoder(FILE* stream, DecodedMusic* Sound, std::string const& filen
 	// Initializing internal audio decoder
 	int audiotype;
 	fseek(stream, 0, SEEK_SET);
-	audio_decoder->Open(stream);
+	if (!audio_decoder->Open(stream)) Output::Error("An error occured in audio decoder (%s)", audio_decoder->GetError().c_str());
 	audio_decoder->SetLooping(true);
 	AudioDecoder::Format int_format;
 	int samplerate;	

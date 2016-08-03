@@ -30,7 +30,7 @@
 #endif
 #include "psp2_decoder.h"
 
-uint8_t bgm_chn;
+uint16_t bgm_chn = 0xDEAD;
 
 // osGetTime implementation
 uint64_t osGetTime(void){
@@ -54,8 +54,14 @@ static int streamThread(unsigned int args, void* arg){
 		if (BGM == NULL) continue; // No BGM detected
 		else if (BGM->starttick == 0) continue; // BGM not started
 		else if (!BGM->isPlaying) continue; // BGM paused
-		
 		sceKernelWaitSema(BGM_Mutex, 1, NULL);
+		
+		if (bgm_chn == 0xDEAD){
+			bgm_chn = sceAudioOutOpenPort(SCE_AUDIO_OUT_PORT_TYPE_BGM, BGM_BUFSIZE, BGM->orig_samplerate, SCE_AUDIO_OUT_MODE_STEREO);
+			if (bgm_chn < 0) Output::Error("Cannot open BGM audio port. (0x%lX)", bgm_chn);
+			sceAudioOutSetConfig(bgm_chn, -1, -1, -1);
+			sceAudioOutSetVolume(bgm_chn, SCE_AUDIO_VOLUME_FLAG_L_CH | SCE_AUDIO_VOLUME_FLAG_R_CH, &BGM->vol);	
+		}
 		
 		// Calculating delta in milliseconds
 		uint64_t delta = (osGetTime() - BGM->starttick);
@@ -98,7 +104,8 @@ static int streamThread(unsigned int args, void* arg){
 		// Audio streaming feature
 		if (BGM->handle != NULL){
 			BGM->updateCallback();
-			sceAudioOutOutput(bgm_chn, BGM->cur_audiobuf);
+			int res = sceAudioOutOutput(bgm_chn, BGM->cur_audiobuf);
+			if (res < 0) Output::Error("An error occurred in audio thread (0x%lX)", res);
 		}
 		
 		sceKernelSignalSema(BGM_Mutex, 1);
@@ -199,9 +206,6 @@ void Psp2Audio::BGM_Play(std::string const& file, int volume, int /* pitch */, i
 	#endif
 	
 	// Starting BGM
-	bgm_chn = sceAudioOutOpenPort(SCE_AUDIO_OUT_PORT_TYPE_MAIN, BGM_BUFSIZE, BGM->orig_samplerate, SCE_AUDIO_OUT_MODE_STEREO);
-	sceAudioOutSetConfig(bgm_chn, -1, -1, -1);
-	sceAudioOutSetVolume(bgm_chn, SCE_AUDIO_VOLUME_FLAG_L_CH | SCE_AUDIO_VOLUME_FLAG_R_CH, &vol);
 	BGM->isPlaying = true;
 	BGM->starttick = osGetTime();
 	
@@ -227,6 +231,7 @@ void Psp2Audio::BGM_Stop() {
 	if (BGM == NULL) return;
 	sceAudioOutReleasePort(bgm_chn);
 	BGM->isPlaying = false;
+	bgm_chn = 0xDEAD;
 }
 
 bool Psp2Audio::BGM_PlayedOnce() {
