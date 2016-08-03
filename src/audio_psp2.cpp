@@ -30,6 +30,8 @@
 #endif
 #include "psp2_decoder.h"
 
+uint8_t bgm_chn;
+
 // osGetTime implementation
 uint64_t osGetTime(void){
 	return (sceKernelGetProcessTimeWide() / 1000);
@@ -95,9 +97,8 @@ static int streamThread(unsigned int args, void* arg){
 		
 		// Audio streaming feature
 		if (BGM->handle != NULL){
-			uint32_t block_mem = BGM->audiobuf_size>>1;
-			uint32_t curPos = BGM->samplerate * BGM->bytepersample * (delta / 1000);
-			if (curPos > block_mem * BGM->block_idx) BGM->updateCallback();
+			BGM->updateCallback();
+			sceAudioOutOutput(bgm_chn, BGM->cur_audiobuf);
 		}
 		
 		sceKernelSignalSema(BGM_Mutex, 1);
@@ -198,10 +199,9 @@ void Psp2Audio::BGM_Play(std::string const& file, int volume, int /* pitch */, i
 	#endif
 	
 	// Starting BGM
-	bgm_chn = sceAudioOutOpenPort(SCE_AUDIO_OUT_PORT_TYPE_VOICE, BGM_BUFSIZE, BGM->orig_samplerate, SCE_AUDIO_OUT_MODE_STEREO);
+	bgm_chn = sceAudioOutOpenPort(SCE_AUDIO_OUT_PORT_TYPE_MAIN, BGM_BUFSIZE, BGM->orig_samplerate, SCE_AUDIO_OUT_MODE_STEREO);
 	sceAudioOutSetConfig(bgm_chn, -1, -1, -1);
 	sceAudioOutSetVolume(bgm_chn, SCE_AUDIO_VOLUME_FLAG_L_CH | SCE_AUDIO_VOLUME_FLAG_R_CH, &vol);
-	sceAudioOutOutput(bgm_chn, BGM->audiobuf);
 	BGM->isPlaying = true;
 	BGM->starttick = osGetTime();
 	
@@ -344,6 +344,7 @@ void Psp2Audio::SE_Play(std::string const& file, int volume, int /* pitch */) {
 		sceAudioOutOutput(chn, &audiobuf[cur_pos]);
 		cur_pos += buf_size;
 	}
+	sceAudioOutReleasePort(chn);
 }
 
 void Psp2Audio::SE_Stop() {

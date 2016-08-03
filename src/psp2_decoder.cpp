@@ -29,7 +29,6 @@
 #include "psp2_decoder.h"
 #endif
 extern DecodedMusic* BGM;
-extern int bgm_chn;
 std::unique_ptr<AudioDecoder> audio_decoder;
 
 
@@ -114,14 +113,9 @@ void UpdateAudioDecoderStream(){
 	Sound->block_idx++;	
 	int half_check = (Sound->block_idx)%2;
 	
-	if (half_check){
-		if (Sound->cur_audiobuf == Sound->audiobuf) Sound->cur_audiobuf = Sound->audiobuf2;
-		else Sound->cur_audiobuf = Sound->audiobuf;
-	}
+	if (Sound->cur_audiobuf == Sound->audiobuf) Sound->cur_audiobuf = Sound->audiobuf2;
+	else Sound->cur_audiobuf = Sound->audiobuf;
 	audio_decoder->Decode(Sound->cur_audiobuf, Sound->audiobuf_size);	
-	if (half_check){
-		sceAudioOutOutput(bgm_chn, Sound->cur_audiobuf);
-	}
 	if (audio_decoder->GetLoopCount() > 0){ // EoF
 		if (Sound->eof_idx == 0xFFFFFFFF) Sound->eof_idx = Sound->block_idx + 1;
 	}
@@ -176,9 +170,7 @@ int OpenAudioDecoder(FILE* stream, DecodedMusic* Sound, std::string const& filen
 	Sound->audiobuf_offs = 0;
 	Sound->audiobuf = (uint8_t*)malloc(Sound->audiobuf_size);
 	Sound->audiobuf2 = (uint8_t*)malloc(Sound->audiobuf_size);
-	Sound->cur_audiobuf = Sound->audiobuf;
-	
-	int res=audio_decoder->Decode(Sound->audiobuf, Sound->audiobuf_size);	
+	Sound->cur_audiobuf = Sound->audiobuf;	
 	
 	//Setting default streaming values
 	Sound->block_idx = 1;

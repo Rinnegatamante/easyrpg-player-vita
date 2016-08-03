@@ -18,7 +18,7 @@
 #ifdef PSP2
 
 // Headers
-#include "PSP2_ui.h"
+#include "psp2_ui.h"
 #include "color.h"
 #include "graphics.h"
 #include "keys.h"
